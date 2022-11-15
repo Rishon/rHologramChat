@@ -6,7 +6,6 @@ import dev.rishon.rhologramchat.nms.HologramEntity;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,19 +36,17 @@ public class PlayerChat implements Listener {
         HologramEntity hologram = new HologramEntity(this.getNms(), player, message);
 
         List<HologramEntity> holograms = this.nms.getHolograms().get(uuid);
-
-
-        HologramEntity oldHologram = holograms.get(0);
-        Bukkit.broadcastMessage("test " + holograms.size() + " | state " + oldHologram.getState());
-        if (oldHologram.getState() >= 2.0) {
-            oldHologram.remove();
-            return;
+        if (holograms != null && !holograms.isEmpty()) {
+            HologramEntity oldHologram = holograms.get(0);
+            if (oldHologram.getState() >= 2) oldHologram.remove();
+            oldHologram = holograms.get(0);
+            oldHologram.setState(oldHologram.getState() + 1);
+            oldHologram.update();
+            holograms.set(0, oldHologram);
+            this.nms.getHolograms().put(uuid, holograms);
         }
 
-        oldHologram.setState(oldHologram.getState() + 0.5);
-        oldHologram.update();
-        holograms.set(holograms.indexOf(oldHologram), oldHologram);
-        this.nms.getHolograms().put(uuid, holograms);
+        hologram.spawn();
     }
 
 }

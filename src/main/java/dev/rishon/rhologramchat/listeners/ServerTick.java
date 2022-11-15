@@ -17,7 +17,7 @@ public class ServerTick implements Listener {
         this.handler = handler;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onServerTick(ServerTickStartEvent event) {
         if (this.handler.getHolograms().isEmpty()) return;
         CompletableFuture.runAsync(() -> this.handler.getHolograms().forEach((uuid, hologram) -> hologram.forEach(HologramEntity::update)));

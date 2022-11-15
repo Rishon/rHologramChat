@@ -1,5 +1,6 @@
 package dev.rishon.rhologramchat.nms;
 
+import dev.rishon.rhologramchat.Utils;
 import dev.rishon.rhologramchat.handler.NMSHandler;
 import lombok.Data;
 import net.kyori.adventure.text.Component;
@@ -10,7 +11,6 @@ import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.world.entity.decoration.EntityArmorStand;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
@@ -41,11 +41,11 @@ public class HologramEntity {
     private void create() {
         CraftWorld world = (CraftWorld) player.getWorld();
         Location location = player.getLocation();
-        setEntity(new EntityArmorStand(world.getHandle(), location.getX(), location.getY() + 0.5, location.getZ()));
+        setEntity(new EntityArmorStand(world.getHandle(), location.getX(), location.getY() + Utils.fixHeight(state), location.getZ()));
         ArmorStand armorStand = (ArmorStand) entity.getBukkitEntity();
         armorStand.setInvisible(true);
         armorStand.setGravity(false);
-        armorStand.customName(text);
+        armorStand.customName(Utils.fixText(text));
         armorStand.setCustomNameVisible(true);
         armorStand.setSmall(true);
         armorStand.setMarker(false);
@@ -61,9 +61,9 @@ public class HologramEntity {
             ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutSpawnEntity(entity, 78));
             ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutEntityMetadata(entity.ae(), watcher, true));
         });
+        setTask(player.getServer().getScheduler().runTaskLaterAsynchronously(this.handler.getHandler().getPlugin(), this::remove, 20L * 5).getTaskId());
         List<HologramEntity> holograms = handler.getHolograms().get(uuid);
         if (holograms != null) {
-            Bukkit.broadcastMessage("holograms size: " + holograms.size());
             holograms.add(this);
             handler.getHolograms().put(uuid, holograms);
         } else {
@@ -76,11 +76,10 @@ public class HologramEntity {
     public void update() {
         Location location = player.getLocation();
         CompletableFuture.runAsync(() -> {
-            entity.a(location.getX(), location.getY() + state, location.getZ());
-            PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(entity);
+            entity.a(location.getX(), location.getY() + Utils.fixHeight(state), location.getZ());
             DataWatcher watcher = entity.ai();
             watcher.b(DataWatcherRegistry.a.a(0), (byte) 32);
-            ((CraftPlayer) player).getHandle().b.a(packet);
+            ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutEntityTeleport(entity));
             ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutEntityMetadata(entity.ae(), watcher, true));
         });
     }
@@ -88,8 +87,9 @@ public class HologramEntity {
     public void remove() {
         UUID uuid = player.getUniqueId();
         CompletableFuture.runAsync(() -> ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutEntityDestroy(entity.ae())));
+        player.getServer().getScheduler().cancelTask(getTask());
         List<HologramEntity> holograms = handler.getHolograms().get(uuid);
-        holograms.remove(this);
+        holograms.remove(0);
         handler.getHolograms().put(uuid, holograms);
     }
 
