@@ -1,0 +1,7 @@
+name: rHologramChat
+version: '${project.version}'
+main: dev.rishon.rhologramchat.Main
+api-version: 1.19
+authors: [ Rishon ]
+description: Async NMS Hologram Chat
+website: https://rishon.systems
