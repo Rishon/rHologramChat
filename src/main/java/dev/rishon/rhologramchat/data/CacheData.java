@@ -1,7 +1,7 @@
 package dev.rishon.rhologramchat.data;
 
-import dev.rishon.rhologramchat.Main;
 import dev.rishon.rhologramchat.data.player.PlayerData;
+import dev.rishon.rhologramchat.handler.MainHandler;
 import lombok.Data;
 
 import java.util.Map;
@@ -11,12 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 public class CacheData {
 
-    private final Main plugin;
+    private final MainHandler handler;
 
     private final Map<UUID, PlayerData> data;
 
-    public CacheData(Main plugin) {
-        this.plugin = plugin;
+    public CacheData(MainHandler handler) {
+        this.handler = handler;
         this.data = new ConcurrentHashMap<>();
     }
 
@@ -26,7 +26,8 @@ public class CacheData {
 
     public void saveUser(UUID uuid) {
         if (data.containsKey(uuid)) {
-            plugin.getHandler().getSqlData().saveUser(uuid, data.get(uuid));
+            this.handler.getSqlData().saveUser(uuid, data.get(uuid));
+            this.handler.getFileHandler().updateExistingPlayerData(uuid);
             data.remove(uuid);
         }
     }

@@ -39,11 +39,11 @@ public class MainHandler implements Handler {
     @Override
     public void register() {
         this.config = plugin.getConfig();
+        this.cacheData = new CacheData(this);
         this.fileHandler = new FileHandler(this);
 
         this.nmsHandler = new NMSHandler(this);
-        this.sqlData = new SQLData(this.getPlugin());
-        this.cacheData = new CacheData(this.getPlugin());
+        this.sqlData = new SQLData(this);
 
         registerCommands();
         registerListeners();
@@ -56,6 +56,7 @@ public class MainHandler implements Handler {
     public void unregister() {
         this.nmsHandler.unregister();
         this.sqlData.unregister();
+        this.fileHandler.unregister();
     }
 
     private void registerListeners() {
