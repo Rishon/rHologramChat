@@ -45,7 +45,7 @@ public class HologramEntity {
         ArmorStand armorStand = (ArmorStand) entity.getBukkitEntity();
         armorStand.setInvisible(true);
         armorStand.setGravity(false);
-        armorStand.customName(Utils.fixText(text));
+        armorStand.customName(Utils.fixText(player, text));
         armorStand.setCustomNameVisible(true);
         armorStand.setSmall(true);
         armorStand.setMarker(false);
