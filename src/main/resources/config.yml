@@ -1,0 +1,11 @@
+# rHologramChat
+
+database:
+  type: MYSQL # MYSQL or YAML
+  mysql-credentials:
+    host: 127.0.0.1
+    port: 3306
+    database: root
+    username: root
+    password: root
+    table_prefix: rHologramChat_

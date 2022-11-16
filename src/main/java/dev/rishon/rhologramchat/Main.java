@@ -1,10 +1,12 @@
 package dev.rishon.rhologramchat;
 
 import dev.rishon.rhologramchat.handler.MainHandler;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
 
+    @Getter
     private MainHandler handler;
 
     @Override

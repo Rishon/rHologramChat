@@ -1,6 +1,8 @@
 package dev.rishon.rhologramchat.handler;
 
 import dev.rishon.rhologramchat.Main;
+import dev.rishon.rhologramchat.data.CacheData;
+import dev.rishon.rhologramchat.data.SQLData;
 import dev.rishon.rhologramchat.listeners.PlayerChat;
 import dev.rishon.rhologramchat.listeners.ServerTick;
 import lombok.Getter;
@@ -12,6 +14,10 @@ public class MainHandler implements Handler {
     private final Main plugin;
     private NMSHandler nmsHandler;
 
+    // Data
+    private SQLData sqlData;
+    private CacheData cacheData;
+
     public MainHandler(Main plugin) {
         this.plugin = plugin;
         this.plugin.getLogger().info("Initializing MainHandler...");
@@ -21,6 +27,8 @@ public class MainHandler implements Handler {
     @Override
     public void register() {
         this.nmsHandler = new NMSHandler(this);
+        this.sqlData = new SQLData(this.getPlugin());
+        this.cacheData = new CacheData(this.getPlugin());
         registerListeners();
         this.plugin.getLogger().info("MainHandler initialized!");
     }
