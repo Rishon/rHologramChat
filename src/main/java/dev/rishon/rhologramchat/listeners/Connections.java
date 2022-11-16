@@ -38,6 +38,6 @@ public class Connections implements Listener {
             holograms.forEach(HologramEntity::remove);
             this.handler.getNmsHandler().getHolograms().remove(uuid);
         }
-       this.handler.getCacheData().saveUser(uuid);
+        this.handler.getCacheData().saveUser(uuid);
     }
 }

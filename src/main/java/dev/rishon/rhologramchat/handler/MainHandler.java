@@ -1,20 +1,32 @@
 package dev.rishon.rhologramchat.handler;
 
 import dev.rishon.rhologramchat.Main;
+import dev.rishon.rhologramchat.commands.SelfHologramCommand;
+import dev.rishon.rhologramchat.components.DataTypes;
 import dev.rishon.rhologramchat.data.CacheData;
 import dev.rishon.rhologramchat.data.SQLData;
 import dev.rishon.rhologramchat.listeners.PlayerChat;
 import dev.rishon.rhologramchat.listeners.ServerTick;
 import lombok.Getter;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
+
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class MainHandler implements Handler {
 
+    // Instance
     private final Main plugin;
+    // Handlers
     private NMSHandler nmsHandler;
+    private FileHandler fileHandler;
+    // Config
+    private FileConfiguration config;
 
     // Data
+    private DataTypes dataType;
     private SQLData sqlData;
     private CacheData cacheData;
 
@@ -26,16 +38,24 @@ public class MainHandler implements Handler {
 
     @Override
     public void register() {
+        this.config = plugin.getConfig();
+        this.fileHandler = new FileHandler(this);
+
         this.nmsHandler = new NMSHandler(this);
         this.sqlData = new SQLData(this.getPlugin());
         this.cacheData = new CacheData(this.getPlugin());
+
+        registerCommands();
         registerListeners();
+
+        loadPlayers();
         this.plugin.getLogger().info("MainHandler initialized!");
     }
 
     @Override
     public void unregister() {
         this.nmsHandler.unregister();
+        this.sqlData.unregister();
     }
 
     private void registerListeners() {
@@ -44,5 +64,21 @@ public class MainHandler implements Handler {
         manager.registerEvents(new ServerTick(this.getNmsHandler()), this.plugin);
     }
 
+    private void registerCommands() {
+        this.plugin.getCommand("selfhologram").setExecutor(new SelfHologramCommand(this.getCacheData()));
+    }
+
+    void loadPlayers() {
+        if (!this.getSqlData().isEnabled()) return;
+        this.getPlugin().getLogger().info("Loading players...");
+        this.getPlugin().getServer().getOnlinePlayers().forEach(player -> {
+            UUID uuid = player.getUniqueId();
+            CompletableFuture.runAsync(() -> this.getSqlData().loadUser(uuid));
+        });
+    }
+
+    public void setDataType(DataTypes dataType) {
+        this.dataType = dataType;
+    }
 
 }

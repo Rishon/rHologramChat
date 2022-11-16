@@ -1,4 +1,4 @@
-package dev.rishon.rhologramchat;
+package dev.rishon.rhologramchat.utilities;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

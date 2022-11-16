@@ -5,3 +5,8 @@ api-version: 1.19
 authors: [ Rishon ]
 description: Async NMS Hologram Chat
 website: https://rishon.systems
+commands:
+  selfhologram:
+    description: See your own holographic messages
+    aliases: [selfh]
+    permission: rhologramchat.selfhologram

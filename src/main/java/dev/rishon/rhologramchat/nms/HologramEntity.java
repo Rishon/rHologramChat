@@ -1,7 +1,7 @@
 package dev.rishon.rhologramchat.nms;
 
-import dev.rishon.rhologramchat.Utils;
 import dev.rishon.rhologramchat.handler.NMSHandler;
+import dev.rishon.rhologramchat.utilities.Utils;
 import lombok.Data;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityDestroy;
@@ -63,14 +63,9 @@ public class HologramEntity {
         });
         setTask(player.getServer().getScheduler().runTaskLaterAsynchronously(this.handler.getHandler().getPlugin(), this::remove, 20L * 5).getTaskId());
         List<HologramEntity> holograms = handler.getHolograms().get(uuid);
-        if (holograms != null) {
-            holograms.add(this);
-            handler.getHolograms().put(uuid, holograms);
-        } else {
-            holograms = new LinkedList<>();
-            holograms.add(this);
-            handler.getHolograms().put(uuid, holograms);
-        }
+        if (holograms == null) holograms = new LinkedList<>();
+        holograms.add(this);
+        handler.getHolograms().put(uuid, holograms);
     }
 
     public void update() {

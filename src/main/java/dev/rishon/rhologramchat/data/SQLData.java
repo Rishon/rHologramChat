@@ -1,6 +1,7 @@
 package dev.rishon.rhologramchat.data;
 
 import dev.rishon.rhologramchat.Main;
+import dev.rishon.rhologramchat.components.DataTypes;
 import dev.rishon.rhologramchat.data.player.PlayerData;
 import dev.rishon.rhologramchat.handler.Handler;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,15 +12,16 @@ import java.util.UUID;
 public class SQLData implements Handler {
 
     private final Main plugin;
+    private boolean enabled;
     private String PLAYERS_TABLE;
     private Connection connection;
 
-    // Credientials
+    // Credentials
     private String host;
     private String database;
     private String username;
     private String password;
-    private long port;
+    private int port;
 
     public SQLData(Main plugin) {
         this.plugin = plugin;
@@ -29,37 +31,41 @@ public class SQLData implements Handler {
 
     @Override
     public void register() {
-        String path = "database.mysql-credentials";
+
+        if (!this.plugin.getHandler().getDataType().equals(DataTypes.MYSQL)) return;
+
+        this.enabled = true;
+        String path = "storage.mysql-credentials";
         FileConfiguration config = plugin.getConfig();
         this.host = config.getString(path + ".host");
         this.database = config.getString(path + ".database");
         this.username = config.getString(path + ".username");
         this.password = config.getString(path + ".password");
-        this.port = config.getLong(path + ".port");
-        this.PLAYERS_TABLE = config.getString(path + "table_prefix") + "players";
-
+        this.port = config.getInt(path + ".port");
+        this.PLAYERS_TABLE = config.getString(path + ".table_prefix") + "players";
         openConnection();
         createTables();
     }
 
     @Override
     public void unregister() {
-
+        savePlayers();
+        closeConnection();
+        this.enabled = false;
     }
 
     // Load the user into the database
     public void loadUser(UUID uuid) {
+        if (!enabled) return;
         try {
             ResultSet resultSet = connection.prepareStatement("SELECT * FROM " + PLAYERS_TABLE + " WHERE UUID='" + uuid.toString() + "';").executeQuery();
             if (!resultSet.next()) {
                 connection.createStatement().executeUpdate("INSERT INTO " + PLAYERS_TABLE + " (UUID, SELF_HOLOGRAM) VALUES ('" + uuid + "', FALSE)");
-                this.plugin.getLogger().info("Player " + uuid + " was not found in the database, adding him now.");
                 this.plugin.getHandler().getCacheData().loadUser(uuid, new PlayerData(uuid));
             } else {
                 PlayerData playerData = new PlayerData(uuid);
                 playerData.setSelfHologram(resultSet.getBoolean("SELF_HOLOGRAM"));
                 this.plugin.getHandler().getCacheData().loadUser(uuid, playerData);
-                this.plugin.getLogger().info("Loading player " + uuid + " from the database.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -68,6 +74,7 @@ public class SQLData implements Handler {
 
     // Save the user into the database
     public void saveUser(UUID uuid, PlayerData playerData) {
+        if (!enabled) return;
         try {
             ResultSet resultSet = connection.prepareStatement("SELECT * FROM " + PLAYERS_TABLE + " WHERE UUID='" + uuid.toString() + "';").executeQuery();
             if (resultSet.next())
@@ -79,6 +86,7 @@ public class SQLData implements Handler {
 
     // Create tables
     private void createTables() {
+        if (!enabled) return;
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + PLAYERS_TABLE + "` (UUID VARCHAR(36), SELF_HOLOGRAM BOOLEAN, PRIMARY KEY (UUID)) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;");
@@ -89,6 +97,7 @@ public class SQLData implements Handler {
 
     // Testing
     public void dropTables() {
+        if (!enabled) return;
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate("DROP TABLE " + PLAYERS_TABLE + ";");
@@ -97,8 +106,15 @@ public class SQLData implements Handler {
         }
     }
 
+    private void savePlayers() {
+        if (!enabled) return;
+        this.plugin.getLogger().info("Saving players...");
+        this.plugin.getHandler().getCacheData().getData().keySet().forEach(uuid -> this.plugin.getHandler().getCacheData().saveUser(uuid));
+    }
+
     // Database Connection
     private Connection openConnection() {
+        if (!enabled) return null;
         try {
             synchronized (this) {
                 if (connection != null && !connection.isClosed()) {
@@ -109,9 +125,22 @@ public class SQLData implements Handler {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            this.enabled = false;
+            this.plugin.getLogger().warning("Could not connect to MySQL server!\n" + e.getMessage());
         }
         return connection;
     }
 
+    private void closeConnection() {
+        if (!enabled) return;
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

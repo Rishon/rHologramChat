@@ -1,11 +1,16 @@
 # rHologramChat
 
-database:
-  type: MYSQL # MYSQL or YAML
+holograms:
+  format: "%message%"
+  max-letters: 50
+
+storage:
+  # Storage types: MYSQL or YAML
+  type: "MYSQL"
   mysql-credentials:
     host: 127.0.0.1
     port: 3306
-    database: root
-    username: root
-    password: root
-    table_prefix: rHologramChat_
+    database: "root"
+    username: "root"
+    password: "root"
+    table_prefix: "rHologramChat_"

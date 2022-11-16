@@ -2,11 +2,13 @@ package dev.rishon.rhologramchat.data;
 
 import dev.rishon.rhologramchat.Main;
 import dev.rishon.rhologramchat.data.player.PlayerData;
+import lombok.Data;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Data
 public class CacheData {
 
     private final Main plugin;
