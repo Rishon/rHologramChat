@@ -1,8 +1,10 @@
 package dev.rishon.rhologramchat.utilities;
 
+import dev.rishon.rhologramchat.types.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.regex.Matcher;
@@ -26,17 +28,26 @@ public class Utils {
         return Component.text(serialize);
     }
 
-    private static String colored(String message) {
+    public static String colored(String message) {
         Pattern pattern = Pattern.compile("&#[a-fA-F0-9]{6}");
         Matcher matcher = pattern.matcher(message);
         while (matcher.find()) {
-            final ChatColor hexColor = ChatColor.of(matcher.group().substring(1));
-            final String before = message.substring(0, matcher.start());
-            final String after = message.substring(matcher.end());
-            message = before + hexColor + after;
+            ChatColor color = ChatColor.of(matcher.group().substring(1));
+            String start = message.substring(0, matcher.start());
+            String end = message.substring(matcher.end());
+            message = start + color + end;
             matcher = pattern.matcher(message);
         }
         return ChatColor.translateAlternateColorCodes('&', message);
+    }
+
+    public static void sendConfigMessage(CommandSender sender, Messages type) {
+        String[] messages = type.getValue();
+        messages = messages == null ? new String[0] : messages;
+        if (messages.length == 0) return;
+        for (String s : messages) {
+            sender.sendMessage(Utils.colored(s));
+        }
     }
 
 

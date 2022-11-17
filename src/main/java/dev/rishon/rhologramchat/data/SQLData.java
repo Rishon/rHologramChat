@@ -1,9 +1,9 @@
 package dev.rishon.rhologramchat.data;
 
-import dev.rishon.rhologramchat.components.DataTypes;
 import dev.rishon.rhologramchat.data.player.PlayerData;
 import dev.rishon.rhologramchat.handler.Handler;
 import dev.rishon.rhologramchat.handler.MainHandler;
+import dev.rishon.rhologramchat.types.DataTypes;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.sql.*;

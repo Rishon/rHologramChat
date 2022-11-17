@@ -25,7 +25,7 @@ public class PlayerChat implements Listener {
         this.nms = handler.getNmsHandler();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     private void onPlayerChat(AsyncChatEvent event) {
         if (event.isCancelled()) return;
 

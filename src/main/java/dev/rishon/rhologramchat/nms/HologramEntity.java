@@ -1,5 +1,6 @@
 package dev.rishon.rhologramchat.nms;
 
+import dev.rishon.rhologramchat.data.player.PlayerData;
 import dev.rishon.rhologramchat.handler.NMSHandler;
 import dev.rishon.rhologramchat.utilities.Utils;
 import lombok.Data;
@@ -55,17 +56,24 @@ public class HologramEntity {
     public void spawn() {
         create();
         UUID uuid = player.getUniqueId();
+        PlayerData data = handler.getHandler().getCacheData().getData().get(uuid);
+        if (data == null) return;
         DataWatcher watcher = entity.ai();
         watcher.b(DataWatcherRegistry.a.a(0), (byte) 32);
+
         CompletableFuture.runAsync(() -> {
-            ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutSpawnEntity(entity, 78));
-            ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutEntityMetadata(entity.ae(), watcher, true));
+            if (data.isSelfHologram()) {
+                ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutSpawnEntity(entity, 78));
+                ((CraftPlayer) player).getHandle().b.a(new PacketPlayOutEntityMetadata(entity.ae(), watcher, true));
+            }
         });
+
         setTask(player.getServer().getScheduler().runTaskLaterAsynchronously(this.handler.getHandler().getPlugin(), this::remove, 20L * 5).getTaskId());
         List<HologramEntity> holograms = handler.getHolograms().get(uuid);
         if (holograms == null) holograms = new LinkedList<>();
         holograms.add(this);
         handler.getHolograms().put(uuid, holograms);
+
     }
 
     public void update() {

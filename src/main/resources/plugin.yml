@@ -6,7 +6,11 @@ authors: [ Rishon ]
 description: Async NMS Hologram Chat
 website: https://rishon.systems
 commands:
+  rhologramchat:
+    description: Main command for rHologramChat
+    aliases: [ rhc, hologramchat ]
+    permission: rhologramchat.cmd.use
   selfhologram:
     description: See your own holographic messages
     aliases: [ selfh ]
-    permission: rhologramchat.selfhologram
+    permission: rhologramchat.cmd.selfhologram

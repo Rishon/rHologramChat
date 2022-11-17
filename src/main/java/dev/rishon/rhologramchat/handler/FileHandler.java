@@ -1,7 +1,9 @@
 package dev.rishon.rhologramchat.handler;
 
-import dev.rishon.rhologramchat.components.DataTypes;
 import dev.rishon.rhologramchat.data.player.PlayerData;
+import dev.rishon.rhologramchat.types.DataTypes;
+import dev.rishon.rhologramchat.types.Messages;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.*;
 import java.util.UUID;
@@ -17,10 +19,10 @@ public class FileHandler implements Handler {
 
     @Override
     public void register() {
-        loadFiles();
+        reloadFiles();
         checkDataType();
         createPlayerDataDirectory();
-        loadPlayers();
+        loadOnlinePlayers();
     }
 
     @Override
@@ -30,10 +32,25 @@ public class FileHandler implements Handler {
         savePlayers();
     }
 
-    public void loadFiles() {
+    public void reloadFiles() {
+        FileConfiguration config = handler.getPlugin().getConfig();
+        String path = "messages.";
+
+        for (Messages message : Messages.values()) {
+            String key = message.getPath();
+            String[] value = message.getValue();
+            config.addDefault(path + key, value);
+        }
+
+        // Get all of messages paths and assign them to the enum
+        for (Messages message : Messages.values()) {
+            message.setValue(config.getStringList(path + message.getPath()).toArray(new String[0]));
+        }
+
+        handler.getPlugin().reloadConfig();
         handler.getConfig().options().copyDefaults(true);
         handler.getPlugin().saveDefaultConfig();
-        handler.getPlugin().reloadConfig();
+        handler.getPlugin().saveConfig();
     }
 
     private void checkDataType() {
@@ -121,14 +138,19 @@ public class FileHandler implements Handler {
         return file.exists();
     }
 
-    private void loadPlayers() {
+    public void loadPlayer(UUID uuid) {
+        if (!this.handler.getDataType().equals(DataTypes.YAML)) return;
+        createPlayerData(uuid);
+        PlayerData data = new PlayerData(uuid);
+        data.setSelfHologram(Boolean.parseBoolean(getStringValue(uuid, "SELF_HOLOGRAM").toLowerCase()));
+        this.handler.getCacheData().loadUser(uuid, data);
+    }
+
+    private void loadOnlinePlayers() {
         if (!this.handler.getDataType().equals(DataTypes.YAML)) return;
         this.handler.getPlugin().getServer().getOnlinePlayers().forEach(player -> {
             UUID uuid = player.getUniqueId();
-            createPlayerData(uuid);
-            PlayerData data = new PlayerData(uuid);
-            data.setSelfHologram(Boolean.parseBoolean(getStringValue(uuid, "SELF_HOLOGRAM").toLowerCase()));
-            this.handler.getCacheData().loadUser(uuid, data);
+            loadPlayer(uuid);
         });
     }
 

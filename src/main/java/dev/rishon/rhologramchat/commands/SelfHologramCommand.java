@@ -2,6 +2,8 @@ package dev.rishon.rhologramchat.commands;
 
 import dev.rishon.rhologramchat.data.CacheData;
 import dev.rishon.rhologramchat.data.player.PlayerData;
+import dev.rishon.rhologramchat.types.Messages;
+import dev.rishon.rhologramchat.utilities.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,7 +24,12 @@ public class SelfHologramCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("You must be a player to execute this command!");
+            Utils.sendConfigMessage(sender, Messages.NO_CONSOLE);
+            return true;
+        }
+
+        if (!player.hasPermission("rhologramchat.cmd.selfhologram")) {
+            Utils.sendConfigMessage(player, Messages.NO_PERMISSION);
             return true;
         }
 
@@ -30,16 +37,22 @@ public class SelfHologramCommand implements CommandExecutor {
         PlayerData data = this.cacheData.getData().get(uuid);
 
         if (data == null) {
-            player.sendMessage("An error occurred while trying to get your data!");
+            Utils.sendConfigMessage(player, Messages.DATA_ERROR);
             return true;
         }
 
         if (data.isSelfHologram()) {
             data.setSelfHologram(false);
-            player.sendMessage("Self hologram disabled!");
+            String[] selfHologramDisabled = Messages.SELF_DISABLED.getValue();
+            for (String s : selfHologramDisabled) {
+                player.sendMessage(Utils.colored(s));
+            }
         } else {
             data.setSelfHologram(true);
-            player.sendMessage("Self hologram enabled!");
+            String[] selfHologramEnabled = Messages.SELF_ENABLED.getValue();
+            for (String s : selfHologramEnabled) {
+                player.sendMessage(Utils.colored(s));
+            }
         }
 
         return false;

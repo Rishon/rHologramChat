@@ -26,8 +26,12 @@ public class CacheData {
 
     public void saveUser(UUID uuid) {
         if (data.containsKey(uuid)) {
-            this.handler.getSqlData().saveUser(uuid, data.get(uuid));
-            this.handler.getFileHandler().updateExistingPlayerData(uuid);
+
+            switch (this.handler.getDataType()) {
+                case MYSQL -> this.handler.getSqlData().saveUser(uuid, data.get(uuid));
+                case YAML -> this.handler.getFileHandler().updateExistingPlayerData(uuid);
+            }
+
             data.remove(uuid);
         }
     }

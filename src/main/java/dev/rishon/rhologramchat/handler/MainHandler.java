@@ -1,12 +1,13 @@
 package dev.rishon.rhologramchat.handler;
 
 import dev.rishon.rhologramchat.Main;
+import dev.rishon.rhologramchat.commands.MainCommand;
 import dev.rishon.rhologramchat.commands.SelfHologramCommand;
-import dev.rishon.rhologramchat.components.DataTypes;
 import dev.rishon.rhologramchat.data.CacheData;
 import dev.rishon.rhologramchat.data.SQLData;
 import dev.rishon.rhologramchat.listeners.PlayerChat;
 import dev.rishon.rhologramchat.listeners.ServerTick;
+import dev.rishon.rhologramchat.types.DataTypes;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
@@ -66,6 +67,7 @@ public class MainHandler implements Handler {
     }
 
     private void registerCommands() {
+        this.plugin.getCommand("rhologramchat").setExecutor(new MainCommand(this));
         this.plugin.getCommand("selfhologram").setExecutor(new SelfHologramCommand(this.getCacheData()));
     }
 
